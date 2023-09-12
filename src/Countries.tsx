@@ -3,44 +3,50 @@ import React, { useState, useEffect } from "react";
 import { ShortCountry } from "./types";
 
 interface Props {
-  countries: any[]; // Eğer "countries" bir dizi ise, bu şekilde belirtebilirsiniz. Daha spesifik bir tür kullanmanız daha iyi olur.
+  countries: ShortCountry[]; 
 }
 
 export const Countries: React.FC<Props> = ({ countries }) => {
-  const [selected, setSelected] = useState("");
+  const [selected, setSelected] = useState<string | null>(null);
   const { register, handleSubmit, control } = useForm({ mode: "onChange" });
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const filteredCountry = (arr: ShortCountry[]) => {
-    const filteredArr = arr.filter((country) => {
-      return country.name.toLowerCase().includes(searchTerm.toLowerCase());
-    });
-
-    return filteredArr;
+    return arr.filter((country) =>
+      country.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
   };
+
   const handleCountrySelect = (countryCode: string) => {
     setSelected(countryCode);
   };
 
   return (
-    <div>
-      <form>
-        <input
-          type="search"
-          placeholder="search"
-          onChange={(e) => {
-            setSearchTerm(e.target.value);
-            console.log(e.target.value);
-          }}
-        />
-      </form>
-      <h1>Ülkeler</h1>
+    <div className="container">
+      <div className="title">
+        <h1>Ülkeler</h1>
+        <form>
+          <input
+            type="search"
+            placeholder="Search"
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+            }}
+          />
+        </form>
+      </div>
       {filteredCountry(countries).length > 0 ? (
-        <ul>
-           {filteredCountry(countries).map((country: ShortCountry) => (
-            <li key={country.code}>
-              <label>
+        <ul className="list">
+          {filteredCountry(countries).map((country: ShortCountry) => (
+            <li
+              className={`list_item ${
+                selected === country.code ? "selected" : ""
+              }`}
+              key={country.code}
+            >
+              <label className="label">
                 <input
+                  className="radio-btn"
                   type="radio"
                   name="selectedCountry"
                   value={country.code}
@@ -55,8 +61,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
       ) : (
         <p>There is no result...</p>
       )}
-        
-
     </div>
   );
 };
+
