@@ -11,7 +11,11 @@ export const Countries: React.FC<Props> = ({ countries }) => {
   const { register, handleSubmit, control } = useForm({ mode: "onChange" });
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [groupTerm, setGroupTerm] = useState<string | null>(null);
-  let selectedCountry;
+  const [showBox, setShowBox] = useState(false);
+
+  const toggleBox = () => {
+    setShowBox(!showBox);
+  };
 
   const filteredCountry = (arr: Country[]) => {
     let filteredArr = arr;
@@ -105,6 +109,8 @@ export const Countries: React.FC<Props> = ({ countries }) => {
   // }, [selected]);
 
   return (
+    
+
     <div className="container">
       <div className="title">
         {selected ? (
@@ -142,6 +148,26 @@ export const Countries: React.FC<Props> = ({ countries }) => {
           />
         </form>
       </div>
+      <div className="box">
+      <span onMouseEnter={toggleBox} onMouseLeave={toggleBox}>Nasıl arama yapabilirim?</span>
+      {showBox && (
+        <div className="">
+          <h2>Örnek Arama:</h2>
+          <p>Kullanıcı "search:Germany code:FR lang:English" gibi bir arama terimi girdiğinde:</p>
+          <ul>
+            <li>
+              İlk olarak, "search:" terimi ile Almanya'nın adı karşılaştırılır ve Almanya'yı içeren ülkeler bulunur.
+            </li>
+            <li>
+              Ardından, "code:" terimi ile Fransa'nın kodu karşılaştırılır ve Fransa'yı içeren ülkeler bulunur.
+            </li>
+            <li>
+              Son olarak, "lang:" terimi ile İngilizce dili karşılaştırılır ve İngilizce konuşulan ülkeler bulunur.
+            </li>
+          </ul>
+        </div>
+      )}
+    </div>
       <div className="results">
         {filteredCountry(countries).length > 0 ? (
           <ul className="list">
