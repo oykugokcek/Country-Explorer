@@ -3,18 +3,37 @@ import React, { useState, useEffect } from "react";
 import { ShortCountry } from "./types";
 
 interface Props {
-  countries: ShortCountry[]; 
+  countries: ShortCountry[];
 }
 
 export const Countries: React.FC<Props> = ({ countries }) => {
   const [selected, setSelected] = useState<string | null>(null);
   const { register, handleSubmit, control } = useForm({ mode: "onChange" });
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [groupTerm, setGroupTerm] = useState<string | null>(null);
 
   const filteredCountry = (arr: ShortCountry[]) => {
-    return arr.filter((country) =>
-      country.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    let filteredArr = arr;
+
+    const queryTokens = searchTerm.split(" ");
+
+    for (const token of queryTokens) {
+      if (token.startsWith("search:")) {
+        const keyword = token.substring(7);
+        filteredArr = filteredArr.filter((country) =>
+          country.name.toLowerCase().includes(keyword.toLowerCase())
+        );
+      }
+
+      if (token.startsWith("code:")) {
+        const field = token.substring(5);
+        filteredArr = filteredArr.filter((country) =>
+          country.code.toLowerCase().includes(field.toLowerCase())
+        );
+      }
+    }
+
+    return filteredArr.slice(0, 10);
   };
 
   const handleCountrySelect = (countryCode: string) => {
@@ -24,7 +43,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
   return (
     <div className="container">
       <div className="title">
-        <h1>Ülkeler</h1>
+        <h1>Countries</h1>
         <form>
           <input
             type="search"
@@ -35,33 +54,34 @@ export const Countries: React.FC<Props> = ({ countries }) => {
           />
         </form>
       </div>
-      {filteredCountry(countries).length > 0 ? (
-        <ul className="list">
-          {filteredCountry(countries).map((country: ShortCountry) => (
-            <li
-              className={`list_item ${
-                selected === country.code ? "selected" : ""
-              }`}
-              key={country.code}
-            >
-              <label className="label">
-                <input
-                  className="radio-btn"
-                  type="radio"
-                  name="selectedCountry"
-                  value={country.code}
-                  checked={selected === country.code}
-                  onChange={() => handleCountrySelect(country.code)}
-                />
-                {country.name}
-              </label>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>There is no result...</p>
-      )}
+      <div className="results">
+        {filteredCountry(countries).length > 0 ? (
+          <ul className="list">
+            {filteredCountry(countries).map((country: ShortCountry) => (
+              <li
+                className={`list_item ${
+                  selected === country.code ? "selected" : ""
+                }`}
+                key={country.code}
+              >
+                <label className="label">
+                  <input
+                    className="radio-btn"
+                    type="radio"
+                    name="selectedCountry"
+                    value={country.code}
+                    checked={selected === country.code}
+                    onChange={() => handleCountrySelect(country.code)}
+                  />
+                  {country.name}
+                </label>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>There is no result...</p>
+        )}
+      </div>
     </div>
   );
 };
-
