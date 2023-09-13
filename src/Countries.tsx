@@ -1,9 +1,9 @@
 import { useForm } from "react-hook-form";
 import React, { useState, useEffect } from "react";
-import { ShortCountry } from "./types";
+import { Country } from "./types";
 
 interface Props {
-  countries: ShortCountry[];
+  countries: Country[];
 }
 
 export const Countries: React.FC<Props> = ({ countries }) => {
@@ -12,11 +12,12 @@ export const Countries: React.FC<Props> = ({ countries }) => {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [groupTerm, setGroupTerm] = useState<string | null>(null);
 
-  const filteredCountry = (arr: ShortCountry[]) => {
+
+  const filteredCountry = (arr: Country[]) => {
     let filteredArr = arr;
-
+  
     const queryTokens = searchTerm.split(" ");
-
+  
     for (const token of queryTokens) {
       if (token.startsWith("search:")) {
         const keyword = token.substring(7);
@@ -24,17 +25,43 @@ export const Countries: React.FC<Props> = ({ countries }) => {
           country.name.toLowerCase().includes(keyword.toLowerCase())
         );
       }
-
+  
       if (token.startsWith("code:")) {
         const field = token.substring(5);
         filteredArr = filteredArr.filter((country) =>
           country.code.toLowerCase().includes(field.toLowerCase())
         );
       }
+  
+      if (token.startsWith("continent:")) {
+        const continentName = token.substring(10);
+        filteredArr = filteredArr.filter((country) =>
+          country.continent.name.toLowerCase().includes(continentName.toLowerCase())
+        );
+      }
+  
+      if (token.startsWith("lang:")) {
+        const languageName = token.substring(5);
+        filteredArr = filteredArr.filter((country) =>
+          country.languages &&
+          country.languages.some(
+            (language) =>
+              language.name.toLowerCase().includes(languageName.toLowerCase())
+          )
+        );
+      }
+  
+      if (token.startsWith("capital:")) {
+        const capitalName = token.substring(8);
+        filteredArr = filteredArr.filter((country) =>
+          country.capital.toLowerCase().includes(capitalName.toLowerCase())
+        );
+      }
     }
-
+  
     return filteredArr.slice(0, 10);
   };
+  
 
   useEffect(() => {
     const filteredItems = filteredCountry(countries);
@@ -57,9 +84,20 @@ export const Countries: React.FC<Props> = ({ countries }) => {
     }
   };
 
-  useEffect(() => {
-    console.log(selected); 
-  }, [selected]);
+  // useEffect(() => {
+  //   console.log(selected);
+  
+  //   const selectedCountry = countries.find((country) => country.code === selected);
+  
+  //   if (selectedCountry ) {
+  //  
+  //     console.log("Selected Country:", selectedCountry);
+  //     console.log("Country Name:", selectedCountry.name);
+  //     console.log("Country Code:", selectedCountry.code);
+  //     console.log(selectedCountry.capital)
+  //   } else {
+  //     console.log("No country selected.");
+  //   }}, [selected]);
 
 
   return (
@@ -72,6 +110,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
             placeholder="Search"
             onChange={(e) => {
               setSearchTerm(e.target.value);
+              console.log(searchTerm)
             }}
           />
         </form>
@@ -79,7 +118,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
       <div className="results">
         {filteredCountry(countries).length > 0 ? (
           <ul className="list">
-            {filteredCountry(countries).map((country: ShortCountry) => (
+            {filteredCountry(countries).map((country: Country) => (
               <li
                 className={`list_item ${
                   selected === country.code ? "selected" : ""

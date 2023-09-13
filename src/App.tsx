@@ -7,7 +7,7 @@ import {
   useQuery,
 } from "@apollo/client";
 import "./App.css";
-import { ShortCountry } from "./types";
+import { Country } from "./types";
 import { Countries } from "./Countries";
 
 const client = new ApolloClient({
@@ -20,23 +20,30 @@ const GET_COUNTRIES = gql`
     countries {
       name
       code
+      capital
+      languages {
+        name
+      }
+      continent {
+        name
+      }
     }
   }
 `;
 
 function App() {
   const { loading, error, data } = useQuery(GET_COUNTRIES, { client });
-  const [countries, setCountries] = useState<ShortCountry[]>([]); // Boş bir dizi olarak başlatıyoruz
+  const [countries, setCountries] = useState<Country[]>([]); 
 
   useEffect(() => {
     if (!loading && !error) {
       setCountries(data.countries);
+      console.log(data)
     }
   }, [loading, error, data]);
 
   return (
     <div className="App">
-      <Countries countries={countries} />
       <Countries countries={countries} />
     </div>
   );
