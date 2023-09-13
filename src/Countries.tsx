@@ -7,17 +7,17 @@ interface Props {
 }
 
 export const Countries: React.FC<Props> = ({ countries }) => {
-  const [selected, setSelected] = useState<string | null>(null);
+  const [selected, setSelected] = useState<Country | null>(null);
   const { register, handleSubmit, control } = useForm({ mode: "onChange" });
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [groupTerm, setGroupTerm] = useState<string | null>(null);
-
+  let selectedCountry;
 
   const filteredCountry = (arr: Country[]) => {
     let filteredArr = arr;
-  
+
     const queryTokens = searchTerm.split(" ");
-  
+
     for (const token of queryTokens) {
       if (token.startsWith("search:")) {
         const keyword = token.substring(7);
@@ -25,32 +25,34 @@ export const Countries: React.FC<Props> = ({ countries }) => {
           country.name.toLowerCase().includes(keyword.toLowerCase())
         );
       }
-  
+
       if (token.startsWith("code:")) {
         const field = token.substring(5);
         filteredArr = filteredArr.filter((country) =>
           country.code.toLowerCase().includes(field.toLowerCase())
         );
       }
-  
+
       if (token.startsWith("continent:")) {
         const continentName = token.substring(10);
         filteredArr = filteredArr.filter((country) =>
-          country.continent.name.toLowerCase().includes(continentName.toLowerCase())
+          country.continent.name
+            .toLowerCase()
+            .includes(continentName.toLowerCase())
         );
       }
-  
+
       if (token.startsWith("lang:")) {
         const languageName = token.substring(5);
-        filteredArr = filteredArr.filter((country) =>
-          country.languages &&
-          country.languages.some(
-            (language) =>
+        filteredArr = filteredArr.filter(
+          (country) =>
+            country.languages &&
+            country.languages.some((language) =>
               language.name.toLowerCase().includes(languageName.toLowerCase())
-          )
+            )
         );
       }
-  
+
       if (token.startsWith("capital:")) {
         const capitalName = token.substring(8);
         filteredArr = filteredArr.filter((country) =>
@@ -58,39 +60,36 @@ export const Countries: React.FC<Props> = ({ countries }) => {
         );
       }
     }
-  
+
     return filteredArr.slice(0, 10);
   };
-  
 
   useEffect(() => {
     const filteredItems = filteredCountry(countries);
     if (filteredItems.length > 0) {
       const selectedItem =
         filteredItems.length >= 10
-          ? filteredItems[9] 
-          : filteredItems[filteredItems.length - 1]; 
-      setSelected(selectedItem.code);
+          ? filteredItems[9]
+          : filteredItems[filteredItems.length - 1];
+      setSelected(selectedItem);
     } else {
-      setSelected(null); 
+      setSelected(null);
     }
   }, [searchTerm, countries]);
 
-  const handleCountrySelect = (countryCode: string) => {
-    if (selected === countryCode) {
-      setSelected(null); 
+  const handleCountrySelect = (country: Country) => {
+    if (selected === country) {
+      setSelected(null);
     } else {
-      setSelected(countryCode); 
+      setSelected(country);
     }
   };
-
   // useEffect(() => {
-  //   console.log(selected);
-  
+
   //   const selectedCountry = countries.find((country) => country.code === selected);
-  
+
   //   if (selectedCountry ) {
-  //  
+
   //     console.log("Selected Country:", selectedCountry);
   //     console.log("Country Name:", selectedCountry.name);
   //     console.log("Country Code:", selectedCountry.code);
@@ -99,18 +98,46 @@ export const Countries: React.FC<Props> = ({ countries }) => {
   //     console.log("No country selected.");
   //   }}, [selected]);
 
+  // useEffect(() => {
+  //   selectedCountry = countries.find(
+  //     (country) => country.code === selected
+  //   );
+  // }, [selected]);
 
   return (
     <div className="container">
       <div className="title">
-        <h1>Countries</h1>
+        {selected ? (
+          <div>
+            <p>
+              <p>
+                Seçilen ülke: <span>{selected.name}</span>
+              </p>
+              Kullanılan {selected.languages.length} dil var.{" "}
+            </p>{" "}
+            <p>
+              {" "}
+              Bu diller:{" "}
+              {selected.languages.map((language, index) => (
+                <span key={language.name}>
+                  {language.name}
+                  {index !== selected.languages.length - 1 ? ", " : ""}
+                </span>
+              ))}{" "}
+            </p>
+            <p> Kıta: {selected.continent.name}</p>
+            <p> Başkent: {selected.capital}.</p>
+          </div>
+        ) : (
+          <div>Ülke seçiniz:</div>
+        )}
         <form>
           <input
             type="search"
             placeholder="Search"
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              console.log(searchTerm)
+              console.log(searchTerm);
             }}
           />
         </form>
@@ -121,7 +148,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
             {filteredCountry(countries).map((country: Country) => (
               <li
                 className={`list_item ${
-                  selected === country.code ? "selected" : ""
+                  selected && selected.code === country.code ? "selected" : ""
                 }`}
                 key={country.code}
               >
@@ -131,8 +158,8 @@ export const Countries: React.FC<Props> = ({ countries }) => {
                     type="radio"
                     name="selectedCountry"
                     value={country.code}
-                    checked={selected === country.code}
-                    onClick={() => handleCountrySelect(country.code)}
+                    checked={selected ? selected.code === country.code : false}
+                    onClick={() => handleCountrySelect(country)}
                   />
                   {country.name}
                 </label>
