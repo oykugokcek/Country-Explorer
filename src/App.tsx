@@ -37,6 +37,7 @@ function App() {
   return (
     <div className="App">
       <Countries countries={countries} />
+      <Countries countries={countries} />
     </div>
   );
 }

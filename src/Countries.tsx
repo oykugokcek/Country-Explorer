@@ -36,9 +36,31 @@ export const Countries: React.FC<Props> = ({ countries }) => {
     return filteredArr.slice(0, 10);
   };
 
+  useEffect(() => {
+    const filteredItems = filteredCountry(countries);
+    if (filteredItems.length > 0) {
+      const selectedItem =
+        filteredItems.length >= 10
+          ? filteredItems[9] 
+          : filteredItems[filteredItems.length - 1]; 
+      setSelected(selectedItem.code);
+    } else {
+      setSelected(null); 
+    }
+  }, [searchTerm, countries]);
+
   const handleCountrySelect = (countryCode: string) => {
-    setSelected(countryCode);
+    if (selected === countryCode) {
+      setSelected(null); 
+    } else {
+      setSelected(countryCode); 
+    }
   };
+
+  useEffect(() => {
+    console.log(selected); 
+  }, [selected]);
+
 
   return (
     <div className="container">
@@ -71,7 +93,7 @@ export const Countries: React.FC<Props> = ({ countries }) => {
                     name="selectedCountry"
                     value={country.code}
                     checked={selected === country.code}
-                    onChange={() => handleCountrySelect(country.code)}
+                    onClick={() => handleCountrySelect(country.code)}
                   />
                   {country.name}
                 </label>
